@@ -7,17 +7,18 @@ import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
 import ImageModal from "./components/ImageModal/ImageModal";
+import { Image } from "./App.types";
 
 const API_KEY = "dAqlN6joIN2RVfgreERnn9uzcSFnYLxHWnFdQtQo6gM";
 
-function App() {
-  const [images, setImages] = useState([]);
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
+export default function App() {
+  const [images, setImages] = useState<Image[]>([]);
+  const [query, setQuery] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [selectedImage, setSelectedImage] = useState<Image | null>(null);
 
   useEffect(() => {
     if (!query) return;
@@ -26,14 +27,18 @@ function App() {
     setError(null);
 
     axios
-      .get(`https://api.unsplash.com/search/photos`, {
+      .get<{ results: Image[] }>(`https://api.unsplash.com/search/photos`, {
         params: { query, page, per_page: 12 },
         headers: { Authorization: `Client-ID ${API_KEY}` },
       })
       .then((response) => {
-        setImages((prevImages) => [...prevImages, ...response.data.results]);
+        setImages((prevImages) =>
+          page === 1
+            ? response.data.results
+            : [...prevImages, ...response.data.results]
+        );
       })
-      .catch((error) => {
+      .catch(() => {
         setError("Something went wrong. Please try again.");
       })
       .finally(() => {
@@ -41,7 +46,7 @@ function App() {
       });
   }, [query, page]);
 
-  const handleSearchSubmit = (searchQuery) => {
+  const handleSearchSubmit = (searchQuery: string) => {
     setQuery(searchQuery);
     setPage(1);
     setImages([]);
@@ -51,7 +56,7 @@ function App() {
     setPage((prevPage) => prevPage + 1);
   };
 
-  const handleImageClick = (image) => {
+  const handleImageClick = (image: Image) => {
     setSelectedImage(image);
     setShowModal(true);
   };
@@ -73,7 +78,7 @@ function App() {
       {images.length > 0 && !loading && (
         <LoadMoreBtn onClick={handleLoadMore} />
       )}
-      {showModal && (
+      {showModal && selectedImage && (
         <ImageModal
           isOpen={showModal}
           onRequestClose={closeModal}
@@ -83,5 +88,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

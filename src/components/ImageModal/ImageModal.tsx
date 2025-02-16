@@ -1,9 +1,14 @@
 import Modal from "react-modal";
 import styles from "./ImageModal.module.css";
+import { ImageModalProps } from "../../App.types";
 
 Modal.setAppElement("#root");
 
-export default function ImageModal({ isOpen, onRequestClose, image }) {
+export default function ImageModal({
+  isOpen,
+  onRequestClose,
+  image,
+}: ImageModalProps) {
   return (
     <Modal
       isOpen={isOpen}
